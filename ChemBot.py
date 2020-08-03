@@ -28,6 +28,9 @@ op.add_argument('--no-sandbox')
 op.add_argument('--disable-dev-sh-usage')
 
 driver = webdriver.Chrome(executable_path=os.getenv('CHROMEDRIVER_PATH'), chrome_options=op)
+# for local testing purposes only; comment out when deployed to Heroku
+#driver = webdriver.Firefox()
+
 driver.get('https://www.sigmaaldrich.com/united-states.html')
 
 @client.event
@@ -63,31 +66,28 @@ async def search(ctx, *args):
 async def sds(ctx, *args):
     query = ' '.join(args)
     results = cs.search(query)
-    if len(results) == 0:
-        await ctx.channel.send('No results found.')
-    else:
-        try:
-            c = results[0]
-            # check for the feedback popup blocking everything
-            if driver.find_elements_by_css_selector('#fsrFocusFirst'):
-                driver.find_element_by_id('fsrFocusFirst').click()
-            search = driver.find_element_by_id('Query')
-            search.clear()
-            search.send_keys(c.inchi)
-            search.send_keys(Keys.RETURN)
-            WebDriverWait(driver, 15).until(
-                EC.presence_of_element_located((By.CLASS_NAME, 'msdsBulletPoint'))
-            )
-            driver.find_element_by_class_name('msdsBulletPoint').click()
-            WebDriverWait(driver, 5)
-            embedVar = discord.Embed(
-                title='SDS Search',
-                description='[SDS for ' + c.common_name + '](' + driver.current_url + ') (Sigma-Aldrich)',
-                color=0x05668d
-            )
-            await ctx.channel.send(embed=embedVar)
-        except Exception as e:
-            await(ctx.channel.send('SDS not found for ' + c.common_name + '.'))
+    name = results[0].common_name if len(results) > 0 else query
+    try:
+        # check for the feedback popup blocking everything
+        if driver.find_elements_by_css_selector('#fsrFocusFirst'):
+            driver.find_element_by_id('fsrFocusFirst').click()
+        search = driver.find_element_by_id('Query')
+        search.clear()
+        search.send_keys(query)
+        search.send_keys(Keys.RETURN)
+        WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located((By.CLASS_NAME, 'msdsBulletPoint'))
+        )
+        driver.find_element_by_class_name('msdsBulletPoint').click()
+        WebDriverWait(driver, 5)
+        embedVar = discord.Embed(
+            title='SDS Search',
+            description='[SDS for ' + name + '](' + driver.current_url + ') (Sigma-Aldrich)',
+            color=0x05668d
+        )
+        await ctx.channel.send(embed=embedVar)
+    except:
+        await(ctx.channel.send('SDS not found for ' + name + '.'))
 
 client.remove_command('help')
 @client.command(pass_context=True)
