@@ -105,7 +105,7 @@ async def wolf(ctx, *args):
     embedVar.add_field(name='query', value=query, inline=False)
     for field in fields:
         parse = field.split(" | ")
-        embedVar.add_field(name=parse[0], value=parse[1], inline=True)
+        embedVar.add_field(name=parse[0], value=parse[1], inline=False)
     await(ctx.channel.send(embed=embedVar))
 
 
@@ -125,7 +125,7 @@ async def help(ctx):
     )
     embedVar.add_field(
         name='!wolf',
-        value='Searches for chemical properties on Wolfram|Alpha.\nExample: !search acetone',
+        value='Searches for chemical properties on Wolfram|Alpha.\nExample: `!search acetone`',
         inline=False
     )
     await(ctx.channel.send(embed=embedVar))
