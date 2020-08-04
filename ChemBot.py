@@ -105,7 +105,7 @@ async def wolf(ctx, *args):
     embedVar = discord.Embed(title = "Wolfram|Alpha Search", color=0x05668d)
     embedVar.add_field(
         name='query',
-        value='[' + query + '](https://www.wolframalpha.com/input/?i=' + query + ') (click for more information)', 
+        value='[' + query + '](https://www.wolframalpha.com/input/?i=' + query.replace(' ', '+') + ') (click for more information)', 
         inline=False)
     for field in fields:
         parse = field.split(" | ")
