@@ -48,7 +48,7 @@ def details_to_embed(c, query):
     embedVar = discord.Embed(title='Chemical Search', color=0x05668d)
     embedVar.add_field(
         name='ChemSpider ID',
-        value='[' + str(c.record_id) + '](http://www.chemspider.com/Chemical-Structure.' + str(c.record_id) + '.html) (click for more physical & chemical properties)',
+        value='[' + str(c.record_id) + '](http://www.chemspider.com/Chemical-Structure.' + str(c.record_id) + '.html) (click for more information)',
         inline=False
     )
     embedVar.add_field(name='Molecular formula', value=formula, inline=True)
@@ -97,15 +97,20 @@ async def sds(ctx, *args):
 async def wolf(ctx, *args):
     query = ' '.join(args)
     result = wolfram.query(query)
+    diagram = [pod for pod in result.pods if pod['@title'] == 'Structure diagram']
     basic = [pod for pod in result.pods if pod['@title'] == 'Basic properties']
     if len(basic) == 0:
         await ctx.channel.send('No results with "Basic properties" section found on Wolfram-Alpha for the query "' + query + '.')
     fields = basic[0]['subpod']['plaintext'].split('\n')
     embedVar = discord.Embed(title = "Wolfram|Alpha Search", color=0x05668d)
-    embedVar.add_field(name='query', value=query, inline=False)
+    embedVar.add_field(
+        name='query',
+        value='[' + query + '](https://www.wolframalpha.com/input/?i=' + query + ') (click for more information)', 
+        inline=False)
     for field in fields:
         parse = field.split(" | ")
         embedVar.add_field(name=parse[0], value=parse[1], inline=False)
+    embedVar.set_image(url=diagram[0]['subpod']['img']['@src'])
     await(ctx.channel.send(embed=embedVar))
 
 
