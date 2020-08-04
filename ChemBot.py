@@ -3,12 +3,14 @@ import os
 import discord
 from discord.ext import commands
 from chemspipy import ChemSpider
+import wolframalpha
 
 from dotenv import load_dotenv
 load_dotenv()
 
 DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 CHEMSPIDER_TOKEN = os.getenv('CHEMSPIDER_TOKEN')
+WOLFRAM_TOKEN = os.getenv('WOLFRAM_TOKEN')
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -20,6 +22,8 @@ from selenium.common.exceptions import TimeoutException
 cs = ChemSpider(CHEMSPIDER_TOKEN)
 
 client = commands.Bot(command_prefix='!')
+
+wolfram = wolframalpha.Client(WOLFRAM_TOKEN)
 
 op = webdriver.ChromeOptions()
 op.binary_location = os.getenv('GOOGLE_CHROME_BIN')
@@ -89,6 +93,22 @@ async def sds(ctx, *args):
     except:
         await(ctx.channel.send('SDS not found for ' + name + '.'))
 
+@client.command(pass_context=True)
+async def wolf(ctx, *args):
+    query = ' '.join(args)
+    result = wolfram.query(query)
+    basic = [pod for pod in result.pods if pod['@title'] == 'Basic properties']
+    if len(basic) == 0:
+        await ctx.channel.send('No results with "Basic properties" section found on Wolfram-Alpha for the query "' + query + '.')
+    fields = basic[0]['subpod']['plaintext'].split('\n')
+    embedVar = discord.Embed(title = "Wolfram|Alpha Search", color=0x05668d)
+    embedVar.add_field(name='query', value=query, inline=False)
+    for field in fields:
+        parse = field.split(" | ")
+        embedVar.add_field(name=parse[0], value=parse[1], inline=True)
+    await(ctx.channel.send(embed=embedVar))
+
+
 client.remove_command('help')
 @client.command(pass_context=True)
 async def help(ctx):
@@ -100,7 +120,12 @@ async def help(ctx):
     )
     embedVar.add_field(
         name='!search',
-        value='Searches for basic chemical information.\nExample: `!search methylene chloride`',
+        value='Searches for basic chemical information on ChemSpider.\nExample: `!search ethanol`',
+        inline=False
+    )
+    embedVar.add_field(
+        name='!wolf',
+        value='Searches for chemical properties on Wolfram|Alpha.\nExample: !search acetone',
         inline=False
     )
     await(ctx.channel.send(embed=embedVar))
