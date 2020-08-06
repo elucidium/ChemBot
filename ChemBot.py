@@ -134,7 +134,7 @@ async def help(ctx):
     )
     embedVar.add_field(
         name='!wolf',
-        value='Searches for chemical properties on Wolfram|Alpha.\nExample: `!search acetone`',
+        value='Searches for chemical properties on Wolfram|Alpha.\nExample: `!wolf acetone`',
         inline=False
     )
     embedVar.add_field(
