@@ -2,15 +2,10 @@ import os
 
 import discord
 from discord.ext import commands
+
 from chemspipy import ChemSpider
+from chemspipy.errors import ChemSpiPyUnavailableError
 import wolframalpha
-
-from dotenv import load_dotenv
-load_dotenv()
-
-DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
-CHEMSPIDER_TOKEN = os.getenv('CHEMSPIDER_TOKEN')
-WOLFRAM_TOKEN = os.getenv('WOLFRAM_TOKEN')
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -19,11 +14,17 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
+from dotenv import load_dotenv
+load_dotenv()
+
+DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
+CHEMSPIDER_TOKEN = os.getenv('CHEMSPIDER_TOKEN')
+WOLFRAM_TOKEN = os.getenv('WOLFRAM_TOKEN')
+
 cs = ChemSpider(CHEMSPIDER_TOKEN)
+wolfram = wolframalpha.Client(WOLFRAM_TOKEN)
 
 client = commands.Bot(command_prefix='!')
-
-wolfram = wolframalpha.Client(WOLFRAM_TOKEN)
 
 op = webdriver.ChromeOptions()
 op.binary_location = os.getenv('GOOGLE_CHROME_BIN')
@@ -60,11 +61,14 @@ def details_to_embed(c, query):
 @client.command(pass_context=True)
 async def search(ctx, *args):
     query = ' '.join(args)
-    results = cs.search(query)
-    if len(results) == 0:
-        await ctx.channel.send('No results found.')
-    else:
-        await ctx.channel.send(embed=details_to_embed(results[0], query))
+    try:
+        results = cs.search(query)
+        if len(results) == 0:
+            await ctx.channel.send('No results found.')
+        else:
+            await ctx.channel.send(embed=details_to_embed(results[0], query))
+    except ChemSpiPyUnavailableError:
+        await ctx.channel.send('ChemSpider is temporarily unavailable.')
 
 @client.command(pass_context=True)
 async def sds(ctx, *args):
@@ -113,7 +117,7 @@ async def wolf(ctx, *args):
     embedVar.set_image(url=diagram[0]['subpod']['img']['@src'])
     await(ctx.channel.send(embed=embedVar))
 
-
+# override default help command
 client.remove_command('help')
 @client.command(pass_context=True)
 async def help(ctx):
@@ -132,6 +136,10 @@ async def help(ctx):
         name='!wolf',
         value='Searches for chemical properties on Wolfram|Alpha.\nExample: `!search acetone`',
         inline=False
+    )
+    embedVar.add_field(
+        name='Have more feature ideas? ✨',
+        value='Feel free to [contribute](https://github.com/elucidium/ChemBot) or send feature suggestions to <@110416449306128384>!'
     )
     await(ctx.channel.send(embed=embedVar))
 
