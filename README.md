@@ -1,6 +1,6 @@
 # ChemBot
 
-A Discord bot for displaying chemical information. Feel free to invite the bot to your server using [this link](https://discord.com/api/oauth2/authorize?client_id=372573281544568832&permissions=67584&scope=bot)!
+A Discord bot for displaying chemical information. Feel free to invite the bot to your server using [this link](https://discord.com/api/oauth2/authorize?client_id=372573281544568832&permissions=67584&scope=bot), or direct message `ChemBot#9478` to use the features!
 
 ## Sample usage
 #### `!help`
