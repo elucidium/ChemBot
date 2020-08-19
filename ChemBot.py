@@ -104,7 +104,7 @@ async def wolf(ctx, *args):
     diagram = [pod for pod in result.pods if pod['@title'] == 'Structure diagram']
     basic = [pod for pod in result.pods if pod['@title'] == 'Basic properties']
     if len(basic) == 0:
-        await ctx.channel.send('No results with "Basic properties" section found on Wolfram-Alpha for the query "' + query + '.')
+        await ctx.channel.send('No results with "Basic properties" section found on Wolfram-Alpha for the query "' + query + '".')
     fields = basic[0]['subpod']['plaintext'].split('\n')
     embedVar = discord.Embed(title = "Wolfram|Alpha Search", color=0x05668d)
     embedVar.add_field(
